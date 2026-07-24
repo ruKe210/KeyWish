@@ -21,14 +21,41 @@ Windows 系统级键盘映射与宏工具。用一份 JSON 配置，把「按下
 使用本机 Miniconda `base` 环境（Python 3.10+）：
 
 ```bash
-git clone https://github.com/ruKe210/KeyWish.git
-cd KeyWish
+cd D:\double\KeyWish
+conda activate base
+```
+
+### 图形界面（推荐）
+
+```bash
+python gui.py
+```
+
+界面支持：
+
+- **一键启用 / 关闭** 全局键盘映射
+- **映射列表一行一条**：显示触发方式与宏，启用后标记【生效中】
+- **保存到 JSON**：写入当前配置文件
+- **导入 JSON…**：
+  - **增量合并**：把导入规则追加进当前 JSON（保留原规则）
+  - **全部替换**：用导入内容覆盖当前 JSON（路径不变）
+- **添加 / 编辑 / 删除 / 复制** 映射规则
+- 启用时自动保存；保存后若正在启用会热重载
+
+也可以启动时直接指定配置文件：
+
+```bash
+python gui.py D:\path\to\my_mappings.json
+```
+
+### 命令行 demo
+
+```bash
 python demo.py --config config/example_mappings.json
 ```
 
-核心仅依赖 Python 标准库（`ctypes` / `json` / `threading`），无需额外 pip 包。
-
-按 `Pause` 退出 demo；也可在控制台按 `Ctrl+C`。部分环境可能需要**管理员权限**才能安装全局键盘钩子。
+核心仅依赖 Python 标准库（`ctypes` / `json` / `threading` / `tkinter`）。  
+部分环境可能需要**管理员权限**才能安装全局键盘钩子。
 
 ## JSON 配置
 
@@ -66,10 +93,12 @@ python demo.py --config config/example_mappings.json
 
 ```
 KeyWish/
-  demo.py
+  gui.py                         # 图形界面（推荐）
+  demo.py                        # 命令行 demo
   config/example_mappings.json
   src/keymap/
-    config.py    # JSON 加载与校验
+    config.py    # JSON 加载 / 保存 / 校验
+    service.py   # 一键启停
     keys.py      # 键名 ↔ VK
     hook.py      # WH_KEYBOARD_LL
     engine.py    # 匹配与双击状态机

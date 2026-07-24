@@ -160,23 +160,16 @@ def _parse_mapping(raw: Any, index: int) -> Mapping:
     )
 
 
-def load_config(path: str | Path) -> AppConfig:
-    path = Path(path)
-    if not path.is_file():
-        raise ConfigError(f"Config file not found: {path}")
-    try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise ConfigError(f"Invalid JSON in {path}: {exc}") from exc
+def parse_config_data(raw: Any) -> AppConfig:
+    """Parse and validate an in-memory config object."""
     data = _require_dict(raw, "root")
     version = int(data.get("version", 1))
     if version != 1:
         raise ConfigError(f"Unsupported config version: {version}")
     mappings_raw = data.get("mappings")
-    if not isinstance(mappings_raw, list) or not mappings_raw:
-        raise ConfigError("'mappings' must be a non-empty array")
+    if not isinstance(mappings_raw, list):
+        raise ConfigError("'mappings' must be an array")
     mappings = tuple(_parse_mapping(item, i) for i, item in enumerate(mappings_raw))
-    # Detect duplicate trigger signatures
     seen: Dict[Tuple[FrozenSet[str], int, str], str] = {}
     for m in mappings:
         sig = (m.trigger.modifiers, m.trigger.key_vk, m.trigger.tap)
@@ -191,6 +184,62 @@ def load_config(path: str | Path) -> AppConfig:
         settings=_parse_settings(data.get("settings")),
         mappings=mappings,
     )
+
+
+def load_config(path: str | Path) -> AppConfig:
+    path = Path(path)
+    if not path.is_file():
+        raise ConfigError(f"Config file not found: {path}")
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ConfigError(f"Invalid JSON in {path}: {exc}") from exc
+    return parse_config_data(raw)
+
+
+def mapping_to_dict(mapping: Mapping) -> Dict[str, Any]:
+    item: Dict[str, Any] = {
+        "id": mapping.id,
+        "trigger": {
+            "key": mapping.trigger.key,
+            "tap": mapping.trigger.tap,
+        },
+        "action": {
+            "type": mapping.action.type,
+        },
+    }
+    if mapping.trigger.modifiers:
+        item["trigger"]["modifiers"] = sorted(mapping.trigger.modifiers)
+    if mapping.double_tap_ms is not None:
+        item["doubleTapMs"] = mapping.double_tap_ms
+    if mapping.action.type == "keys":
+        item["action"]["sequence"] = list(mapping.action.sequence)
+    return item
+
+
+def config_to_dict(config: AppConfig) -> Dict[str, Any]:
+    return {
+        "version": config.version,
+        "settings": {
+            "doubleTapMs": config.settings.double_tap_ms,
+            "sequenceDelayMs": config.settings.sequence_delay_ms,
+        },
+        "mappings": [mapping_to_dict(m) for m in config.mappings],
+    }
+
+
+def save_config(path: str | Path, config: AppConfig) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    text = json.dumps(config_to_dict(config), ensure_ascii=False, indent=2)
+    path.write_text(text + "\n", encoding="utf-8")
+
+
+def save_config_data(path: str | Path, data: Dict[str, Any]) -> AppConfig:
+    """Validate dict, save to disk, return parsed config."""
+    config = parse_config_data(data)
+    save_config(path, config)
+    return config
 
 
 def find_mapping(

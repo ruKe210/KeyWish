@@ -7,21 +7,39 @@
   "mappings": [
     {
       "id": "ctrl-double-c",
-      "doubleTapMs": 200,
-      "trigger": { "key": "c", "modifiers": ["ctrl"], "tap": "double" },
+      "trigger": {
+        "key": "c",
+        "tap": "double",
+        "modifiers": [
+          "ctrl"
+        ]
+      },
       "action": {
         "type": "keys",
-        "sequence": ["ctrl+d", "ctrl+c"]
-      }
+        "sequence": [
+          "ctrl+d",
+          "ctrl+c"
+        ]
+      },
+      "doubleTapMs": 200
     },
     {
       "id": "ctrl-double-v",
-      "doubleTapMs": 200,
-      "trigger": { "key": "v", "modifiers": ["ctrl"], "tap": "double" },
+      "trigger": {
+        "key": "v",
+        "tap": "double",
+        "modifiers": [
+          "ctrl"
+        ]
+      },
       "action": {
         "type": "keys",
-        "sequence": ["ctrl+d", "ctrl+v"]
-      }
+        "sequence": [
+          "ctrl+d",
+          "ctrl+v"
+        ]
+      },
+      "doubleTapMs": 200
     }
   ]
 }
