@@ -7,7 +7,7 @@
   "mappings": [
     {
       "id": "ctrl-double-c",
-      "doubleTapMs": 350,
+      "doubleTapMs": 200,
       "trigger": { "key": "c", "modifiers": ["ctrl"], "tap": "double" },
       "action": {
         "type": "keys",

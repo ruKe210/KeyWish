@@ -208,3 +208,10 @@ def find_mapping(
 
 def has_double_mapping(config: AppConfig, modifiers: FrozenSet[str], key_vk: int) -> bool:
     return find_mapping(config, modifiers, key_vk, "double") is not None
+
+
+def effective_double_tap_ms(config: AppConfig, mapping: Mapping) -> int:
+    """Per-mapping doubleTapMs, falling back to settings.doubleTapMs."""
+    if mapping.double_tap_ms is not None:
+        return mapping.double_tap_ms
+    return config.settings.double_tap_ms

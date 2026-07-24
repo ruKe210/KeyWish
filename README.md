@@ -25,9 +25,21 @@ python demo.py --config config/example_mappings.json
 | `trigger.key` | 主键，如 `c` / `f1` |
 | `trigger.modifiers` | 可选：`ctrl` / `alt` / `shift` / `win`（**严格匹配**集合） |
 | `trigger.tap` | `single` 或 `double` |
+| `doubleTapMs` | **可选，写在单条 mapping 上**：该条双击判定窗口（毫秒）；不写则用全局默认 |
 | `action.sequence` | 宏序列，如 `["ctrl+d", "ctrl+c"]` |
-| `settings.doubleTapMs` | 双击判定窗口（毫秒） |
+| `settings.doubleTapMs` | 全局默认双击判定窗口（毫秒） |
 | `settings.sequenceDelayMs` | 宏序列项间隔（毫秒） |
+
+每条映射可单独设置双击时间，例如：
+
+```json
+{
+  "id": "ctrl-double-c",
+  "doubleTapMs": 350,
+  "trigger": { "key": "c", "modifiers": ["ctrl"], "tap": "double" },
+  "action": { "type": "keys", "sequence": ["ctrl+d", "ctrl+c"] }
+}
+```
 
 示例能力：
 

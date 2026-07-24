@@ -12,12 +12,17 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from keymap import ConfigError, MappingEngine, load_config
+from keymap.config import effective_double_tap_ms
 from keymap.keys import resolve_vk
 
 
 def main() -> int:
     cfg = load_config(ROOT / "config" / "example_mappings.json")
     assert len(cfg.mappings) == 2
+    by_id = {m.id: m for m in cfg.mappings}
+    assert effective_double_tap_ms(cfg, by_id["ctrl-double-c"]) == 350
+    assert effective_double_tap_ms(cfg, by_id["ctrl-double-v"]) == 200
+    print("per-mapping doubleTapMs OK")
 
     hits: list[tuple[str, str]] = []
     replays: list[tuple] = []
@@ -50,7 +55,7 @@ def main() -> int:
         eng2._mods_down.add("ctrl")
         assert eng2.handle_event(resolve_vk("c"), True, False, 0) is True
         assert eng2.handle_event(resolve_vk("c"), False, False, 0) is True
-        time.sleep(cfg.settings.double_tap_ms / 1000.0 + 0.08)
+        time.sleep(effective_double_tap_ms(cfg, by_id["ctrl-double-c"]) / 1000.0 + 0.08)
     finally:
         engine_mod.replay_chord = original_replay  # type: ignore[attr-defined]
 

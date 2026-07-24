@@ -113,11 +113,13 @@ class MappingEngine:
                     # Different key/mod combo: resolve pending first, then process new key
                     self._resolve_pending_as_single_locked()
 
-            if has_double_mapping(self.config, mods, vk):
+            double_mapping = find_mapping(self.config, mods, vk, "double")
+            if double_mapping is not None:
                 # Start pending window; swallow this down
+                window_ms = effective_double_tap_ms(self.config, double_mapping)
                 self._suppress_ups.add(vk)
                 timer = threading.Timer(
-                    self.config.settings.double_tap_ms / 1000.0,
+                    window_ms / 1000.0,
                     self._on_pending_timeout,
                     args=(vk, mods),
                 )
@@ -125,9 +127,11 @@ class MappingEngine:
                 self._pending = _Pending(key_vk=vk, modifiers=mods, timer=timer)
                 timer.start()
                 logger.debug(
-                    "Pending double-tap: key=%s mods=%s",
+                    "Pending double-tap: key=%s mods=%s windowMs=%s (mapping=%s)",
                     vk_name(vk),
                     sorted(mods),
+                    window_ms,
+                    double_mapping.id,
                 )
                 return True
 
