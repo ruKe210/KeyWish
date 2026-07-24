@@ -11,16 +11,50 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 from typing import Any, Dict, List, Optional
 
-ROOT = Path(__file__).resolve().parent
-SRC = ROOT / "src"
-if str(SRC) not in sys.path:
+def _app_dir() -> Path:
+    """Directory for user-writable files (next to exe when frozen)."""
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parent
+
+
+def _bundle_dir() -> Path:
+    """Read-only resources bundled inside the exe."""
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS)
+    return Path(__file__).resolve().parent
+
+
+ROOT = _app_dir()
+SRC = Path(__file__).resolve().parent / "src" if not getattr(sys, "frozen", False) else ROOT
+if not getattr(sys, "frozen", False) and str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from keymap import ConfigError  # noqa: E402
 from keymap.config import parse_config_data, save_config_data  # noqa: E402
 from keymap.service import KeyWishService  # noqa: E402
 
-DEFAULT_CONFIG = ROOT / "config" / "example_mappings.json"
+DEFAULT_CONFIG = ROOT / "config" / "mappings.json"
+_BUNDLED_EXAMPLE = _bundle_dir() / "config" / "example_mappings.json"
+
+
+def ensure_default_config() -> Path:
+    """Ensure a writable config exists beside the app; seed from bundled example."""
+    DEFAULT_CONFIG.parent.mkdir(parents=True, exist_ok=True)
+    if not DEFAULT_CONFIG.is_file():
+        if _BUNDLED_EXAMPLE.is_file():
+            DEFAULT_CONFIG.write_text(
+                _BUNDLED_EXAMPLE.read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+        else:
+            # Fallback minimal config
+            DEFAULT_CONFIG.write_text(
+                '{\n  "version": 1,\n  "settings": {"doubleTapMs": 280, "sequenceDelayMs": 30},\n'
+                '  "mappings": []\n}\n',
+                encoding="utf-8",
+            )
+    return DEFAULT_CONFIG
 
 
 def _format_trigger(trigger: Dict[str, Any]) -> str:
@@ -642,14 +676,21 @@ class KeyWishApp(tk.Tk):
 
 
 def main() -> int:
+    log_dir = ROOT / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         datefmt="%H:%M:%S",
+        handlers=[
+            logging.FileHandler(log_dir / "keywish.log", encoding="utf-8"),
+            logging.StreamHandler(sys.stdout),
+        ],
     )
-    config = DEFAULT_CONFIG
     if len(sys.argv) > 1:
         config = Path(sys.argv[1])
+    else:
+        config = ensure_default_config()
     app = KeyWishApp(config)
     app.mainloop()
     return 0

@@ -48,6 +48,20 @@ python gui.py
 python gui.py D:\path\to\my_mappings.json
 ```
 
+### 打包成 exe 分发给别人
+
+```bash
+conda activate base
+powershell -ExecutionPolicy Bypass -File scripts\build_exe.ps1
+```
+
+完成后得到 [`dist/KeyWish.exe`](dist/KeyWish.exe)，把这个文件发给别人即可。
+
+- 首次运行会在 exe 同目录生成 `config/mappings.json`
+- 对方可直接在界面里改映射，或「导入 JSON」
+- 若全局钩子安装失败，让对方右键 **以管理员身份运行**
+- 日志在 exe 同目录 `logs/keywish.log`
+
 ### 命令行 demo
 
 ```bash
