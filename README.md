@@ -21,8 +21,8 @@ Windows 系统级键盘映射与宏工具。用一份 JSON 配置，把「按下
 使用本机 Miniconda `base` 环境（Python 3.10+）：
 
 ```bash
-cd D:\double\KeyWish
-conda activate base
+git clone https://github.com/ruKe210/KeyWish.git
+cd KeyWish
 python demo.py --config config/example_mappings.json
 ```
 
