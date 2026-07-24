@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "settings": {
+    "doubleTapMs": 280,
+    "sequenceDelayMs": 30
+  },
+  "mappings": [
+    {
+      "id": "ctrl-double-c",
+      "doubleTapMs": 350,
+      "trigger": { "key": "c", "modifiers": ["ctrl"], "tap": "double" },
+      "action": {
+        "type": "keys",
+        "sequence": ["ctrl+d", "ctrl+c"]
+      }
+    },
+    {
+      "id": "ctrl-double-v",
+      "doubleTapMs": 200,
+      "trigger": { "key": "v", "modifiers": ["ctrl"], "tap": "double" },
+      "action": {
+        "type": "keys",
+        "sequence": ["ctrl+d", "ctrl+v"]
+      }
+    }
+  ]
+}

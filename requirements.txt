@@ -1,0 +1,2 @@
+# KeyWish core uses only the Python standard library (ctypes, json, threading).
+# No third-party runtime dependencies required.
